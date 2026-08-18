@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  email        String    @unique
+  passwordHash String
+  fullName     String?
+  avatarUrl    String?
+  status       String    @default("ACTIVE") // "ACTIVE" | "DEACTIVATED"
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model OtpVerification {
+  id        String   @id @default(uuid())
+  target    String   // username or email address
+  code      String
+  flow      String   // "login" | "register"
+  attempts  Int      @default(0)
+  isUsed    Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([target, flow])
+  @@map("otp_verifications")
+}
+
+model Verb {
+  id                   String            @id // slug e.g. "go", "be"
+  verb                 String            // Display verb e.g. "Go"
+  category             String            // "Regular" | "Irregular"
+  v1                   String            // Base form
+  v2                   String            // Past form
+  v3                   String            // Past participle
+  v4                   String            // Gerund / -ing form
+  v5                   String            // 3rd Person Singular s/es form
+  hindiMeaning         String            // Devanagari meaning e.g. "जाना"
+  hindiTransliteration String            // Romanized transliteration e.g. "(jaana)"
+  phoneticEnglish      String            // IPA e.g. "/ɡoʊ/"
+  explanation          String            // Conceptual description
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  examples             VerbExample[]
+  usageRules           VerbUsageRule[]
+
+  @@map("verbs")
+}
+
+model VerbExample {
+  id            String   @id @default(uuid())
+  verbId        String
+  verb          Verb     @relation(fields: [verbId], references: [id], onDelete: Cascade)
+  sentence      String
+  tense         String
+  formType      String   // "V1" | "V2" | "V3" | "V4" | "V5"
+  highlightWord String
+  orderIndex    Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([verbId])
+  @@map("verb_examples")
+}
+
+model VerbUsageRule {
+  id           String   @id @default(uuid())
+  verbId       String
+  verb         Verb     @relation(fields: [verbId], references: [id], onDelete: Cascade)
+  form         String
+  name         String
+  usageContext String
+  highlighted  Boolean  @default(false)
+  orderIndex   Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([verbId])
+  @@map("verb_usage_rules")
+}
