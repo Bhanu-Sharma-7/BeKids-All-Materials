@@ -77,3 +77,6 @@ coverage/
 # ============================
 *.tgz
 .cache/
+
+
+sample_verbs_upload.json

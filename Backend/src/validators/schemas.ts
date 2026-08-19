@@ -49,7 +49,7 @@ export const updateProfileSchema = z.object({
     .max(100)
     .optional()
     .or(z.literal('')),
-  avatarUrl: z.string().url().optional().or(z.literal('')),
+  avatarUrl: z.string().optional().or(z.literal('')),
 });
 
 export const verbExampleSchema = z.object({
