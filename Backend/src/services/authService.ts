@@ -40,7 +40,11 @@ export class AuthService {
       avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80',
     });
 
-    const { code } = await otpService.generateOtp(data.email.toLowerCase(), 'register');
+    const { code } = await otpService.generateOtp(
+      data.email.toLowerCase(),
+      'register',
+      data.email.toLowerCase()
+    );
 
     return {
       target: data.email.toLowerCase(),
@@ -79,7 +83,7 @@ export class AuthService {
       throw error;
     }
 
-    const { code } = await otpService.generateOtp(user.username, 'login');
+    const { code } = await otpService.generateOtp(user.username, 'login', user.email);
 
     return {
       target: user.username,
@@ -148,8 +152,9 @@ export class AuthService {
   }> {
     const user = await userRepository.findByUsernameOrEmail(target);
     const flow: 'login' | 'register' = target.includes('@') && !user ? 'register' : 'login';
+    const recipientEmail = user?.email || (target.includes('@') ? target : undefined);
 
-    const { code } = await otpService.generateOtp(target, flow);
+    const { code } = await otpService.generateOtp(target, flow, recipientEmail);
 
     return {
       target,

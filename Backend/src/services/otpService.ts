@@ -1,9 +1,14 @@
 import { otpRepository } from '../repositories/otpRepository';
 import { generateOtpCode } from '../utils/otp';
+import { emailService } from './emailService';
 import { config } from '../config/env';
 
 export class OtpService {
-  async generateOtp(target: string, flow: 'login' | 'register'): Promise<{ code: string; expiresAt: Date }> {
+  async generateOtp(
+    target: string,
+    flow: 'login' | 'register',
+    recipientEmail?: string
+  ): Promise<{ code: string; expiresAt: Date }> {
     const code = generateOtpCode();
     const expiresAt = new Date(Date.now() + config.otpExpiryMinutes * 60 * 1000);
 
@@ -14,12 +19,16 @@ export class OtpService {
       expiresAt,
     });
 
-    console.log(`\n========================================`);
-    console.log(`[DEVELOPMENT OTP] Flow: ${flow.toUpperCase()}`);
-    console.log(`Target: ${target}`);
-    console.log(`OTP Code: ${code}`);
-    console.log(`Expires At: ${expiresAt.toISOString()}`);
-    console.log(`========================================\n`);
+    const emailDestination = recipientEmail || (target.includes('@') ? target : undefined);
+    if (emailDestination) {
+      await emailService.sendOtpEmail(emailDestination, code, flow);
+    } else {
+      console.warn(`[OtpService] Could not resolve email address for target: ${target}`);
+    }
+
+    if (config.isDev) {
+      console.log(`[DEV ONLY] OTP generated for ${target} (${flow})`);
+    }
 
     return { code, expiresAt };
   }

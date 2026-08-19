@@ -14,4 +14,7 @@ export const config = {
   corsOrigin: process.env.CORS_ORIGIN || '*',
   adminEmail: process.env.ADMIN_EMAIL || 'bhanusharma@admin.com',
   adminPassword: process.env.ADMIN_PASSWORD || 'brogami2051N',
+  resendApiKey: process.env.RESEND_API_KEY || '',
+  emailFrom: process.env.EMAIL_FROM || 'BeKids <onboarding@resend.dev>',
 };
+
